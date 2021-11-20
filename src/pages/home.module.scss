@@ -1,1 +1,47 @@
 // TODO
+.container {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+}
+
+.post {
+    margin: 2rem 0;
+    display: block;
+
+    h1 {
+        font-size: 1.75rem;
+        line-height: 2.5rem;
+        transition: color .2s ease;
+    }
+
+    p {
+        font-size: 1.125rem;
+        line-height: 1.37rem;
+        text-align: justify;
+    }
+
+    .postInfo {
+        display: flex;
+        font-size: 0.875rem;
+
+        margin-top: 1rem;
+
+        div {
+            margin-right: 1rem
+        }
+
+        svg {
+            margin-right: .5rem
+        }
+    }
+
+    &:hover h1 {
+        color: var(--highlight)
+    }
+}
+
+.loadButton {
+    background: transparent;
+    color: var(--highlight);
+    font: 600 1.125rem 'Inter', sans-serif;
+}
