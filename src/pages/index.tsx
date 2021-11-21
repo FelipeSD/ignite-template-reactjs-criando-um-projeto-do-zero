@@ -1,4 +1,8 @@
+import { useState } from 'react';
+
 import { GetStaticProps } from 'next';
+import Head from 'next/head';
+import Link from 'next/link';
 
 import Prismic from '@prismicio/client';
 import { getPrismicClient } from '../services/prismic';
@@ -6,11 +10,10 @@ import { getPrismicClient } from '../services/prismic';
 import { format } from 'date-fns'
 
 import { FiCalendar, FiUser } from 'react-icons/fi';
-import Link from 'next/link';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
-import { useState } from 'react';
+import PostInfo from '../components/PostInfo';
 
 interface Post {
   uid?: string;
@@ -34,7 +37,7 @@ interface HomeProps {
 function convertPost(postResponse: any){
   return {
     uid: postResponse.uid,
-    first_publication_date: format(new Date(postResponse.first_publication_date), "dd LLL yyyy"),
+    first_publication_date: postResponse.first_publication_date,
     data: {
       author: postResponse.data.author,
       subtitle: postResponse.data.subtitle,
@@ -44,12 +47,12 @@ function convertPost(postResponse: any){
 }
 
 export default function Home({postsPagination}: HomeProps) {
-  const [loadMore, setLoadMore] = useState<boolean>(() => postsPagination.next_page ? true : false);
+  const [loadMore, setLoadMore] = useState(postsPagination.next_page);
   const [posts, setPosts] = useState<Post[]>(postsPagination.results);
 
   function handleLoadMore(){
-    fetch(postsPagination.next_page).then(response => response.json()).then(data => {
-      setLoadMore(data.next_page ? true : false);
+    fetch(loadMore).then(response => response.json()).then(data => {
+      setLoadMore(data.next_page);
 
       const newPosts = data.results.map((post: any) => {
         return convertPost(post);
@@ -64,8 +67,13 @@ export default function Home({postsPagination}: HomeProps) {
     })
   }
 
+  
+
   return (
     <main className={`${commonStyles.wrapper} ${styles.container}`}>
+      <Head>
+        <title>spacetraveling</title>
+      </Head>
       <img src="/images/logo.svg" alt="logo" />
       {
         posts.map((result: Post) => (
@@ -74,16 +82,16 @@ export default function Home({postsPagination}: HomeProps) {
               <h1>{result.data.title}</h1>
               <p>{result.data.subtitle}</p>
               
-              <div className={styles.postInfo}>
+              <PostInfo>
                 <div>
                   <FiCalendar />
-                  <time>{result.first_publication_date}</time>
+                  <time>{format(new Date(result.first_publication_date), "dd LLL yyyy").toLowerCase()}</time>
                 </div>
                 <div>
                   <FiUser />
                   <span>{result.data.author}</span>
                 </div>
-              </div>
+              </PostInfo>
             </a>
           </Link>
         ))
@@ -119,7 +127,6 @@ export const getStaticProps: GetStaticProps = async () => {
     return convertPost(post);
   });
 
-  // TODO
   return {
     props: {
       postsPagination: {
