@@ -39,9 +39,7 @@ interface PostProps {
   readingTime: number;
 }
 
-export default function Post({post, 
-  // readingTime
-}: PostProps) {
+export default function Post({post, readingTime}: PostProps) {
   const router = useRouter();
 
   if(router.isFallback){
@@ -72,14 +70,14 @@ export default function Post({post,
           </div>
           <div>
             <FiClock />
-            <time>{/* readingTime */} min</time>
+            <time>{readingTime} min</time>
           </div>
         </PostInfo>
 
         { post.data.content.map((content) => (
             <article key={content.heading}>
               <h2>{content.heading}</h2>
-              <p dangerouslySetInnerHTML={{__html: RichText.asHtml(content.body)}} />
+              <div dangerouslySetInnerHTML={{__html: RichText.asHtml(content.body)}}></div>
             </article>
           ))
         }
@@ -113,6 +111,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async ({params}) => {
   const {slug} = params;
+
   const prismic = getPrismicClient();
   const response = await prismic.getByUID("post", String(slug), {});
 
@@ -126,21 +125,20 @@ export const getStaticProps: GetStaticProps = async ({params}) => {
     }
   }
 
-  // let numberWords = post.data.content.reduce((accumulator, content) => {
-  //   let wordsHeading = RichText.asText(content.heading)
-  //   // .split(/[\s\n\t]/).length
-  //   let wordsBody = RichText.asText(content.body).split(/[\s\n\t]/).length
-  //   return accumulator 
-  //   // + wordsHeading
-  //   + wordsBody
-  // }, 0);
+  // .length
+  let numberWords = post.data.content.reduce((accumulator, content) => {
+    let wordsHeading = content.heading.split(/[\s\n\t]/).length
+    let wordsBody = RichText.asText(content.body).split(/[\s\n\t]/).length
 
-  // let readingTime = Math.round(numberWords / 200)
+    return accumulator + wordsHeading + wordsBody
+  }, 0);
+
+  let readingTime = Math.round(numberWords / 200)
 
   return {
     props: {
       post,
-      // readingTime
+      readingTime
     },
     redirect: 60 * 60 * 24
   }
